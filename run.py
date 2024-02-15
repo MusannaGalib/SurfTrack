@@ -2,10 +2,14 @@ import subprocess
 import os
 import time
 
-def run_matlab_script(script_name):
+def run_matlab_script(script_name, npics):
     script_path = os.path.join(os.path.dirname(__file__), script_name)
     try:
         if os.path.isfile(script_path):
+            # Write npics to a text file
+            with open('variables.txt', 'w') as f:
+                f.write(str(npics))
+
             # Replace 'matlab' with the path to your MATLAB executable if it's not in the system PATH
             process = subprocess.Popen(['C:/Program Files/MATLAB/R2022a/bin/matlab', '-nosplash', '-nodesktop', '-r', f"run('{script_path}');exit;"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = process.communicate()
@@ -33,7 +37,10 @@ if __name__ == "__main__":
     matlab_script_name_1 = 'trracking_master_code.m'
     matlab_script_name_2 = 'Tracked_surface_compare.m'
 
-    run_matlab_script(matlab_script_name_1)  # Run the first MATLAB script
+    # Define npics variable
+    npics = 3
+
+    run_matlab_script(matlab_script_name_1, npics)  # Run the first MATLAB script
 
     # Wait until TrackedData.mat is generated
     print("Waiting for TrackedData.mat to be generated...")
@@ -46,6 +53,6 @@ if __name__ == "__main__":
     if os.path.isfile(os.path.join(os.path.dirname(__file__), matlab_script_name_2)):
         print("Second MATLAB script exists.")
         # Run the second MATLAB script
-        run_matlab_script(matlab_script_name_2)
+        run_matlab_script(matlab_script_name_2, npics)
     else:
         print(f"Error: MATLAB script '{matlab_script_name_2}' not found in the same folder as the Python script.")

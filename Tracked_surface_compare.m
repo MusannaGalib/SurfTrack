@@ -10,8 +10,6 @@ actualLengthY = 1800;
 
 % Specify the file paths
 filePaths = {'TrackedData.mat'};
-             %'D:\Experiment\In_situ_OM\Tracking_MLD\TrackedData.mat', ...
-            % 'D:\Experiment\In_situ_OM\Tracking_Bare_Zn\TrackedData.mat'};
 
 % Custom legend labels
 legendLabels = {'ALD Alumina', 'MLD Alucone', 'Bare Zn'};
