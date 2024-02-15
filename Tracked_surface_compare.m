@@ -12,7 +12,7 @@ actualLengthY = 1800;
 filePaths = {'TrackedData.mat'};
 
 % Custom legend labels
-legendLabels = {'ALD Alumina', 'MLD Alucone', 'Bare Zn'};
+legendLabels = {'Bare Zn'};
 
 % Cell array to store clotboundary data for each file
 allClotboundary = cell(1, numel(filePaths));

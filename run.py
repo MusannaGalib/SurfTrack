@@ -37,7 +37,7 @@ if __name__ == "__main__":
     matlab_script_name_1 = 'trracking_master_code.m'
     matlab_script_name_2 = 'Tracked_surface_compare.m'
 
-    # Define npics variable
+    # Define how many images you want from the video
     npics = 3
 
     run_matlab_script(matlab_script_name_1, npics)  # Run the first MATLAB script
