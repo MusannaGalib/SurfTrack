@@ -1,3 +1,21 @@
+Metadata-Version: 2.1
+Name: Image_tracking
+Version: 1.0.0
+Summary: Package for tracking and analyzing in-situ optical microscopy images
+Home-page: https://github.com/MusannaGalib/Image_tracking.git
+Author: Musanna Galib, Matteo Ferraresso
+Author-email: galibubc@student.ubc.ca, matfe@mail.ubc.ca
+License: MIT
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
 # Image Tracking 
 
 This repository contains scripts for tracking and analyzing versatile images from in-situ optical microscopy (OM) experiment or Blood Clotting experiments.

@@ -14,9 +14,6 @@ setup(
     install_requires=[
         # Add any Python dependencies required by your package
     ],
-    extras_require={
-        'MATLAB': ['MATLAB>=R2022a']
-    },
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',
