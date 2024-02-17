@@ -73,6 +73,7 @@ If you use this software in your research, please cite the following paper:
 
 
 ```python
+```python
 BibTeX entry:
 @article{YourPaper,
   title={Title of Your Paper},
@@ -82,7 +83,6 @@ BibTeX entry:
   publisher={Publisher}
 }
 ```
-
 
 ### Contact, questions, and contributing
 If you have questions, please don't hesitate to reach out to galibubc[at]student[dot]ubc[dot]ca and matfe[at]mail[dot]ubc[dot]ca
