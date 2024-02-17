@@ -73,7 +73,6 @@ If you use this software in your research, please cite the following paper:
 
 
 ```python
-```python
 BibTeX entry:
 @article{YourPaper,
   title={Title of Your Paper},
