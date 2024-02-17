@@ -71,9 +71,8 @@ This Software is developed by Matteo Ferraresso & Musanna Galib
 ## Citing This Work
 If you use this software in your research, please cite the following paper:
 
-[Your Paper Title](link to your paper)
-Author Name. "Title of Your Paper." Journal/Conference, Year.
 
+```python
 BibTeX entry:
 @article{YourPaper,
   title={Title of Your Paper},
@@ -82,6 +81,7 @@ BibTeX entry:
   year={2024},
   publisher={Publisher}
 }
+```
 
 
 ### Contact, questions, and contributing
