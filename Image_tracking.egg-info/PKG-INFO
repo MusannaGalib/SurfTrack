@@ -49,12 +49,17 @@ pip install .
 
    Image_tracking can also be installed from PyPI:
 ```bash
-     pip install Image_tracking
+pip install Image_tracking
 ```
 
 ### Using the Package
 
-To use this package, just copy your movie.mp4 file in the scirpts folder and run the following command 
+To use this package, give your matlab executable path in run.py. Then just copy your movie.mp4 file in the scirpts folder and run the following command 
+
+```python
+process = subprocess.Popen(['C:/Program Files/MATLAB/R2022a/bin/matlab', '-nosplash', '-nodesktop', '-r', f"run('{script_path}');exit;"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+```
+
 
 ```python
 
