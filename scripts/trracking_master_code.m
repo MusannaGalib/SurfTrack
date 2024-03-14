@@ -5,7 +5,19 @@
     
     %folder=fullfile('D:\Experiment\In_situ_OM\package_development_Musanna_Matteo\Tracking_Bare_Zn');
     %cd 'D:\Experiment\In_situ_OM\package_development_Musanna_Matteo\Tracking_Bare_Zn'
-    movieFileName = 'movie.mp4';
+   % Get a list of all .mp4 files in the current directory
+mp4Files = dir('*.mp4');
+
+% Check if there are any .mp4 files
+if isempty(mp4Files)
+    error('No .mp4 files found in the current directory.');
+else
+    % Use the first .mp4 file found
+    movieFileName = mp4Files(1).name;
+end
+
+% Construct the full file name
+
     movieFullFileName = fullfile(fileparts(mfilename('fullpath')), movieFileName);
         
     % Check to see that it exists.
