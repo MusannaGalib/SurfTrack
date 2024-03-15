@@ -44,4 +44,15 @@ if __name__ == "__main__":
     runner_script_name = 'run.py'  # Assuming this is the name of your current Python script
     print("Starting video processing...")
     setup_and_run_video_processing(matlab_script_names, runner_script_name)
-    print("All videos have been processed and cleanup is complete.")
+    print("Video processing finished. Starting cleanup...")
+
+    # Ensure the current directory is the base directory before calling delete.py
+    base_directory = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(base_directory)
+
+    # Call delete.py to perform cleanup
+    try:
+        subprocess.check_call(['python', 'delete.py'])
+        print("Cleanup completed successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error during cleanup: {e}")
