@@ -4,6 +4,7 @@ import torch  # Importing PyTorch for deep learning
 import torch.nn as nn  # Importing PyTorch's neural network module
 import torch.optim as optim  # Importing PyTorch's optimization module
 import numpy as np  # Importing NumPy for numerical operations
+from sklearn.model_selection import train_test_split  # Importing train_test_split from scikit-learn
 
 # Function to load and preprocess images
 def load_images(folder_path):
@@ -61,11 +62,16 @@ images = load_images(folder_path)
 # Normalize pixel values to range [0, 1]
 images_normalized = images / 255.0
 
+# Split data into training and validation sets
+train_images, val_images = train_test_split(images_normalized, test_size=0.2, random_state=42)
+
 # Prepare input data
-input_data = np.expand_dims(images_normalized, axis=1)  # Add channel dimension
+train_data = np.expand_dims(train_images, axis=1)  # Add channel dimension
+val_data = np.expand_dims(val_images, axis=1)  # Add channel dimension
 
 # Convert data to PyTorch tensors
-X_train_tensor = torch.tensor(input_data, dtype=torch.float32)
+X_train_tensor = torch.tensor(train_data, dtype=torch.float32)
+X_val_tensor = torch.tensor(val_data, dtype=torch.float32)
 
 # Define the model
 model = UNet(in_channels=1, out_channels=1)
@@ -82,33 +88,17 @@ for epoch in range(num_epochs):
     outputs = model(X_train_tensor)
     
     # Resize outputs to match the size of input data
-    outputs_resized = torch.nn.functional.interpolate(outputs, size=input_data.shape[2:], mode='bilinear', align_corners=True)
+    outputs_resized = torch.nn.functional.interpolate(outputs, size=train_data.shape[2:], mode='bilinear', align_corners=True)
     
     loss = criterion(outputs_resized, X_train_tensor)
     loss.backward()
     optimizer.step()
-    print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
+    print(f'Training - Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
 
-
-# Make predictions and track variables for different j values
-# Removed the loop for j_values as per your request
-
-# Prepare input data for j value
-# Assuming input data preparation for different j values involves some specific logic
-
-# Make predictions using the trained model
-# Assuming model.predict() method returns predictions
-
-predictions = model.predict(input_data)  # Example
-
-# Track variables (eta, pot, w) at different times
-# Assuming tracking logic involves processing predictions
-
-# Example tracking logic
-for t, pred in zip(time_steps, predictions):
-    # Process prediction at time step t
-    # Example:
-    eta_t = pred[..., 0]  # Extract eta
-    pot_t = pred[..., 1]  # Extract pot
-    w_t = pred[..., 2]  # Extract w
-    # Process and track variables as needed
+# Evaluation loop
+model.eval()
+with torch.no_grad():
+    val_outputs = model(X_val_tensor)
+    val_outputs_resized = torch.nn.functional.interpolate(val_outputs, size=val_data.shape[2:], mode='bilinear', align_corners=True)
+    val_loss = criterion(val_outputs_resized, X_val_tensor)
+    print(f'Validation Loss: {val_loss.item():.4f}')
