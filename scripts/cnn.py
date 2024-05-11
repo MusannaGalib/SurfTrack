@@ -27,6 +27,10 @@ folder_path = r'/mnt/d/Experiment/In_situ_OM/Image_tracking/scripts/movie/tracke
 # Load and preprocess images
 images = load_images(folder_path)
 
+# Ensure that the directory for saving figures exists
+save_dir = 'Imgs'
+os.makedirs(save_dir, exist_ok=True)
+
 
 class SineLayer(nn.Module):
 
@@ -124,7 +128,7 @@ if __name__ == "__main__":
     for i, model in enumerate([mlp, siren]):
         # Training
         optim = torch.optim.Adam(lr=1e-4, params=model.parameters())
-        psnr, model_output = train(model, optim, pixel_coordinates, pixel_values, nb_epochs=15000)
+        psnr, model_output = train(model, optim, pixel_coordinates, pixel_values, nb_epochs=10)
 
         axes[i + 1].imshow(model_output.cpu().view(resolution, resolution).detach().numpy(), cmap='gray')
         axes[i + 1].set_title('ReLU' if (i == 0) else 'SIREN', fontsize=13)
@@ -137,5 +141,5 @@ if __name__ == "__main__":
         axes[i].set_xticks([])
         axes[i].set_yticks([])
     axes[3].axis('off')
-    plt.savefig('Imgs/Siren.png')
+    plt.savefig(os.path.join(save_dir, 'Siren.png'))
     plt.close()
