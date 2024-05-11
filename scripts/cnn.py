@@ -4,7 +4,6 @@ import torch
 import torch.nn as nn
 import skimage
 import numpy as np
-from sklearn.model_selection import train_test_split
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
@@ -86,12 +85,17 @@ def train(model, model_optimizer, pixel_coordinates, pixel_values, nb_epochs=150
     psnr = []
     for _ in tqdm(range(nb_epochs)):
         model_output = model(pixel_coordinates)
-        print("Shape of model_output:", model_output.shape)
-        print("Shape of pixel_values:", pixel_values.shape)
-        
-        loss = ((model_output - pixel_values) ** 2).mean()
+
+        # Resize model output tensor to match the size of pixel values tensor
+        model_output_resized = model_output[:pixel_values.size(0)]
+
+        # Print sizes of tensors for debugging
+        print("Size of model_output_resized:", model_output_resized.size())
+        print("Size of pixel_values:", pixel_values.size())
+
+        loss = ((model_output_resized - pixel_values) ** 2).mean()
         print("Loss:", loss.item())
-        
+
         psnr.append(20 * np.log10(1.0 / np.sqrt(loss.item())))
 
         model_optimizer.zero_grad()
@@ -99,6 +103,8 @@ def train(model, model_optimizer, pixel_coordinates, pixel_values, nb_epochs=150
         model_optimizer.step()
 
     return psnr, model_output
+
+
 
 
 if __name__ == "__main__":
@@ -111,35 +117,52 @@ if __name__ == "__main__":
     siren = Siren().to(device)
     mlp = MLP().to(device)
 
-    # Target
-    img = ((torch.from_numpy(skimage.data.camera()) - 127.5) / 127.5)
-    pixel_values = img.reshape(-1, 1).to(device)
+    # Ensure that the directory for saving figures exists
+    os.makedirs(save_dir, exist_ok=True)
 
-    # Input
-    resolution = img.shape[0]
-    tmp = torch.linspace(-1, 1, steps=resolution)
-    x, y = torch.meshgrid(tmp, tmp)
-    pixel_coordinates = torch.cat((x.reshape(-1, 1), y.reshape(-1, 1)), dim=1).to(device)
+    for i, img in enumerate(images):
+        # Print shape of the loaded image
+        print(f"Shape of image {i+1}:", img.shape)
 
-    fig, axes = plt.subplots(1, 5, figsize=(15, 3))
-    axes[0].imshow(img, cmap='gray')
-    axes[0].set_title('Ground Truth', fontsize=13)
+        # Convert image to torch tensor
+        img_tensor = torch.from_numpy(img).float().unsqueeze(0).unsqueeze(0).to(device)
+        pixel_values = img_tensor.view(-1, 1)
 
-    for i, model in enumerate([mlp, siren]):
-        # Training
-        optim = torch.optim.Adam(lr=1e-4, params=model.parameters())
-        psnr, model_output = train(model, optim, pixel_coordinates, pixel_values, nb_epochs=10)
+        # Print shape of the pixel_values tensor
+        print(f"Shape of pixel_values tensor {i+1}:", pixel_values.shape)
 
-        axes[i + 1].imshow(model_output.cpu().view(resolution, resolution).detach().numpy(), cmap='gray')
-        axes[i + 1].set_title('ReLU' if (i == 0) else 'SIREN', fontsize=13)
-        axes[4].plot(psnr, label='ReLU' if (i == 0) else 'SIREN', c='C0' if (i == 0) else 'mediumseagreen')
-        axes[4].set_xlabel('Iterations', fontsize=14)
-        axes[4].set_ylabel('PSNR', fontsize=14)
-        axes[4].legend(fontsize=13)
+        # Input
+        resolution = max(img.shape)  # Use the maximum dimension of the image as resolution
+        tmp = torch.linspace(-1, 1, steps=resolution)
+        x, y = torch.meshgrid(tmp, tmp)
+        pixel_coordinates = torch.cat((x.reshape(-1, 1), y.reshape(-1, 1)), dim=1).to(device)
 
-    for i in range(4):
-        axes[i].set_xticks([])
-        axes[i].set_yticks([])
-    axes[3].axis('off')
-    plt.savefig(os.path.join(save_dir, 'Siren.png'))
-    plt.close()
+        fig, axes = plt.subplots(1, 5, figsize=(15, 3))
+        axes[0].imshow(img, cmap='gray')
+        axes[0].set_title('Ground Truth', fontsize=13)
+
+        for j, model in enumerate([mlp, siren]):
+            # Training
+            optim = torch.optim.Adam(lr=1e-4, params=model.parameters())
+            psnr, model_output = train(model, optim, pixel_coordinates, pixel_values, nb_epochs=10)
+
+            axes[j + 1].imshow(model_output.cpu().view(resolution, resolution).detach().numpy(), cmap='gray')
+            axes[j + 1].set_title('ReLU' if (j == 0) else 'SIREN', fontsize=13)
+            axes[4].plot(psnr, label='ReLU' if (j == 0) else 'SIREN', c='C0' if (j == 0) else 'mediumseagreen')
+            axes[4].set_xlabel('Iterations', fontsize=14)
+            axes[4].set_ylabel('PSNR', fontsize=14)
+            axes[4].legend(fontsize=13)
+
+        for j in range(4):
+            axes[j].set_xticks([])
+            axes[j].set_yticks([])
+        axes[3].axis('off')
+
+        # Save the figure
+        plt.savefig(os.path.join(save_dir, f'training_results_{i}.png'))
+        plt.close()
+
+    # Save the trained models
+    torch.save(mlp.state_dict(), 'mlp_model.pth')
+    torch.save(siren.state_dict(), 'siren_model.pth')
+
