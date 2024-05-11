@@ -2,10 +2,11 @@ import os
 import cv2
 import torch
 import torch.nn as nn
-import torch.optim as optim
+import skimage
 import numpy as np
 from sklearn.model_selection import train_test_split
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 # Function to load and preprocess images
 def load_images(folder_path):
@@ -20,74 +21,15 @@ def load_images(folder_path):
         images.append(img)
     return np.array(images)
 
-# Load and preprocess images
+# Define the folder path where your images are stored
 folder_path = r'/mnt/d/Experiment/In_situ_OM/Image_tracking/scripts/movie/tracked'
+
+# Load and preprocess images
 images = load_images(folder_path)
 
-# Split data into training and validation sets
-train_images, val_images = train_test_split(images, test_size=0.2, random_state=42)
 
-# Convert data to PyTorch tensors
-X_train_tensor = torch.tensor(np.expand_dims(train_images, axis=1), dtype=torch.float32)
-X_val_tensor = torch.tensor(np.expand_dims(val_images, axis=1), dtype=torch.float32)
-
-# Define U-Net architecture
-class UNet(nn.Module):
-    """
-    Define U-Net architecture.
-    """
-    def __init__(self, in_channels, out_channels):
-        super(UNet, self).__init__()
-        # Encoder layers
-        self.encoder = nn.Sequential(
-            nn.Conv2d(in_channels, 64, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(64, 64, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2)
-        )
-        # Decoder layers
-        self.decoder = nn.Sequential(
-            nn.Conv2d(64, 128, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(128, out_channels, kernel_size=3, padding=1),
-            nn.Sigmoid()
-        )
-
-    def forward(self, x):
-        x1 = self.encoder(x)
-        x2 = self.decoder(x1)
-        return x2
-
-# Define Siren architecture
-class Siren(nn.Module):
-    """
-    Define Siren architecture.
-    """
-    def __init__(self, w0=30, in_dim=2, hidden_dim=256, out_dim=1):
-        super(Siren, self).__init__()
-
-        self.net = nn.Sequential(
-            nn.Linear(in_dim, hidden_dim), SineLayer(w0),
-            nn.Linear(hidden_dim, hidden_dim), SineLayer(w0),
-            nn.Linear(hidden_dim, hidden_dim), SineLayer(w0),
-            nn.Linear(hidden_dim, hidden_dim), SineLayer(w0),
-            nn.Linear(hidden_dim, out_dim)
-        )
-
-        with torch.no_grad():
-            for i in [0, 2, 4, 6, 8]:
-                nn.init.uniform_(self.net[i].weight, -1. / in_dim if i == 0 else -np.sqrt(6. / hidden_dim) / w0,
-                                 1. / in_dim if i == 0 else np.sqrt(6. / hidden_dim) / w0)
-
-    def forward(self, x):
-        return self.net(x)
-
-# Define SineLayer
 class SineLayer(nn.Module):
-    """
-    Sine layer for Siren architecture.
-    """
+
     def __init__(self, w0):
         super(SineLayer, self).__init__()
         self.w0 = w0
@@ -95,104 +37,105 @@ class SineLayer(nn.Module):
     def forward(self, x):
         return torch.sin(self.w0 * x)
 
-# Define loss function
-criterion = nn.BCELoss()
 
-# Define U-Net model
-model = UNet(in_channels=1, out_channels=1)
+class Siren(nn.Module):
+    def __init__(self, w0=30, in_dim=2, hidden_dim=256, out_dim=1):
+        super(Siren, self).__init__()
 
-# Define Siren model
-siren = Siren()
+        self.net = nn.Sequential(nn.Linear(in_dim, hidden_dim), SineLayer(w0),
+                                 nn.Linear(hidden_dim, hidden_dim), SineLayer(w0),
+                                 nn.Linear(hidden_dim, hidden_dim), SineLayer(w0),
+                                 nn.Linear(hidden_dim, hidden_dim), SineLayer(w0),
+                                 nn.Linear(hidden_dim, out_dim))
 
-# Define optimizer for U-Net
-optimizer_unet = optim.Adam(model.parameters(), lr=0.001)
+        # Init weights
+        with torch.no_grad():
+            self.net[0].weight.uniform_(-1. / in_dim, 1. / in_dim)
+            self.net[2].weight.uniform_(-np.sqrt(6. / hidden_dim) / w0,
+                                        np.sqrt(6. / hidden_dim) / w0)
+            self.net[4].weight.uniform_(-np.sqrt(6. / hidden_dim) / w0,
+                                        np.sqrt(6. / hidden_dim) / w0)
+            self.net[6].weight.uniform_(-np.sqrt(6. / hidden_dim) / w0,
+                                        np.sqrt(6. / hidden_dim) / w0)
+            self.net[8].weight.uniform_(-np.sqrt(6. / hidden_dim) / w0,
+                                        np.sqrt(6. / hidden_dim) / w0)
 
-# Define optimizer for Siren
-optimizer_siren = optim.Adam(siren.parameters(), lr=0.001)
-
-# Define number of epochs
-num_epochs = 10
-
-# Define device
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-# Move tensors to device
-X_train_tensor = X_train_tensor.to(device)
-X_val_tensor = X_val_tensor.to(device)
-
-# Training loop for U-Net
-for epoch in range(num_epochs):
-    model.train()
-    optimizer_unet.zero_grad()
-    outputs = model(X_train_tensor)
-    
-    # Resize outputs to match the size of target tensor
-    outputs_resized = torch.nn.functional.interpolate(outputs, size=X_train_tensor.shape[2:], mode='bilinear', align_corners=True)
-    
-    loss = criterion(outputs_resized, X_train_tensor)
-    loss.backward()
-    optimizer_unet.step()
-    print(f'U-Net - Training - Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
+    def forward(self, x):
+        return self.net(x)
 
 
-# Define Siren model
-resolution = 256
-tmp = torch.linspace(-1, 1, steps=resolution)
-x, y = torch.meshgrid(tmp, tmp)
-pixel_coordinates = torch.cat((x.reshape(-1, 1), y.reshape(-1, 1)), dim=1).to(device)
+class MLP(nn.Module):
+    def __init__(self, in_dim=2, hidden_dim=256, out_dim=1):
+        super(MLP, self).__init__()
 
-# Training loop for Siren
-for epoch in range(num_epochs):
-    siren.train()
-    optimizer_siren.zero_grad()
-    model_output = siren(pixel_coordinates)
-    
-    # Generate ground truth pixel values for validation
-    img = ((torch.from_numpy(images[0]) - 127.5) / 127.5)
+        self.net = nn.Sequential(nn.Linear(in_dim, hidden_dim), nn.ReLU(),
+                                 nn.Linear(hidden_dim, hidden_dim), nn.ReLU(),
+                                 nn.Linear(hidden_dim, hidden_dim), nn.ReLU(),
+                                 nn.Linear(hidden_dim, hidden_dim), nn.ReLU(),
+                                 nn.Linear(hidden_dim, out_dim))
+
+    def forward(self, x):
+        return self.net(x)
+
+
+def train(model, model_optimizer, pixel_coordinates, pixel_values, nb_epochs=15000):
+    psnr = []
+    for _ in tqdm(range(nb_epochs)):
+        model_output = model(pixel_coordinates)
+        print("Shape of model_output:", model_output.shape)
+        print("Shape of pixel_values:", pixel_values.shape)
+        
+        loss = ((model_output - pixel_values) ** 2).mean()
+        print("Loss:", loss.item())
+        
+        psnr.append(20 * np.log10(1.0 / np.sqrt(loss.item())))
+
+        model_optimizer.zero_grad()
+        loss.backward()
+        model_optimizer.step()
+
+    return psnr, model_output
+
+
+if __name__ == "__main__":
+    # Check if CUDA is available
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    # Print device
+    print('Using device:', device)
+
+    siren = Siren().to(device)
+    mlp = MLP().to(device)
+
+    # Target
+    img = ((torch.from_numpy(skimage.data.camera()) - 127.5) / 127.5)
     pixel_values = img.reshape(-1, 1).to(device)
 
-    # Compute loss
-    loss_siren = ((model_output - pixel_values) ** 2).mean()
-    loss_siren.backward()
-    optimizer_siren.step()
-    print(f'Siren - Training - Epoch [{epoch+1}/{num_epochs}], Loss: {loss_siren.item():.4f}')
+    # Input
+    resolution = img.shape[0]
+    tmp = torch.linspace(-1, 1, steps=resolution)
+    x, y = torch.meshgrid(tmp, tmp)
+    pixel_coordinates = torch.cat((x.reshape(-1, 1), y.reshape(-1, 1)), dim=1).to(device)
 
+    fig, axes = plt.subplots(1, 5, figsize=(15, 3))
+    axes[0].imshow(img, cmap='gray')
+    axes[0].set_title('Ground Truth', fontsize=13)
 
+    for i, model in enumerate([mlp, siren]):
+        # Training
+        optim = torch.optim.Adam(lr=1e-4, params=model.parameters())
+        psnr, model_output = train(model, optim, pixel_coordinates, pixel_values, nb_epochs=15000)
 
+        axes[i + 1].imshow(model_output.cpu().view(resolution, resolution).detach().numpy(), cmap='gray')
+        axes[i + 1].set_title('ReLU' if (i == 0) else 'SIREN', fontsize=13)
+        axes[4].plot(psnr, label='ReLU' if (i == 0) else 'SIREN', c='C0' if (i == 0) else 'mediumseagreen')
+        axes[4].set_xlabel('Iterations', fontsize=14)
+        axes[4].set_ylabel('PSNR', fontsize=14)
+        axes[4].legend(fontsize=13)
 
-
-
-
-# Validation for U-Net
-model.eval()
-val_outputs = model(X_val_tensor)
-val_outputs_resized = torch.nn.functional.interpolate(val_outputs, size=X_val_tensor.shape[2:], mode='bilinear', align_corners=True)
-val_loss = criterion(val_outputs_resized, X_val_tensor)
-print(f'U-Net - Validation Loss: {val_loss.item():.4f}')
-
-# Validation for Siren
-siren.eval()
-val_outputs_siren = siren(pixel_coordinates)
-
-# Generate ground truth pixel values for validation
-img = ((torch.from_numpy(images[0]) - 127.5) / 127.5)
-pixel_values = img.reshape(-1, 1).to(device)
-
-# Compute validation loss
-val_loss_siren = ((val_outputs_siren - pixel_values) ** 2).mean()
-print(f'Siren - Validation Loss: {val_loss_siren.item():.4f}')
-
-
-# Save predicted and ground truth validation images for U-Net
-for i, (pred, gt) in enumerate(zip(val_outputs, X_val_tensor)):
-    pred_img = (pred.squeeze().detach().cpu().numpy() * 255).astype(np.uint8)
-    gt_img = (gt.squeeze().detach().cpu().numpy() * 255).astype(np.uint8)
-    cv2.imwrite(f'val_image_{i+1}_predicted_unet.png', pred_img)
-    cv2.imwrite(f'val_image_{i+1}_ground_truth_unet.png', gt_img)
-
-# Save predicted and ground truth validation images for Siren
-for i, (pred_siren, gt_siren) in enumerate(zip(val_outputs_siren, pixel_values)):
-    pred_img_siren = (pred_siren.cpu().view(resolution, resolution).detach().numpy() * 255).astype(np.uint8)
-    gt_img_siren = (gt_siren.cpu().view(resolution, resolution).detach().numpy() * 255).astype(np.uint8)
-    cv2.imwrite(f'val_image_{i+1}_predicted_siren.png', pred_img_siren)
-    cv2.imwrite(f'val_image_{i+1}_ground_truth_siren.png', gt_img_siren)
+    for i in range(4):
+        axes[i].set_xticks([])
+        axes[i].set_yticks([])
+    axes[3].axis('off')
+    plt.savefig('Imgs/Siren.png')
+    plt.close()
