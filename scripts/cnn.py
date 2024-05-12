@@ -144,7 +144,7 @@ if __name__ == "__main__":
         for j, model in enumerate([mlp, siren]):
             # Training
             optim = torch.optim.Adam(lr=1e-4, params=model.parameters())
-            psnr, model_output = train(model, optim, pixel_coordinates, pixel_values, nb_epochs=300)
+            psnr, model_output = train(model, optim, pixel_coordinates, pixel_values, nb_epochs=1500)
 
             axes[j + 1].imshow(model_output.cpu().view(resolution, resolution).detach().numpy(), cmap='gray')
             axes[j + 1].set_title('ReLU' if (j == 0) else 'SIREN', fontsize=13)
