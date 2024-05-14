@@ -230,7 +230,7 @@ if __name__ == "__main__":
         for j, model in enumerate([mlp, siren]):
             # Training
             optim = torch.optim.Adam(lr=1e-4, params=model.parameters())
-            psnr, model_output = train_model(model, optim, pixel_coordinates, pixel_values, nb_epochs=10)
+            psnr, model_output = train_model(model, optim, pixel_coordinates, pixel_values, nb_epochs=300)
 
             axes[j + 1].imshow(model_output.cpu().view(resolution, resolution).detach().numpy(), cmap='gray')
             axes[j + 1].set_title('ReLU' if (j == 0) else 'SIREN', fontsize=13)
