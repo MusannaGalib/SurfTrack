@@ -78,12 +78,12 @@ class MLP(nn.Module):
     def forward(self, x):
         return self.net(x)
 
-def train_model(model, model_optimizer, pixel_coordinates, pixel_values, nb_epochs=2):
+def train_model(model, model_optimizer, pixel_coordinates, pixel_values, nb_epochs=300):
     """
     Train the model on the given data.
     """
     psnr = []
-    for _ in tqdm(range(nb_epochs)):
+    for epoch in tqdm(range(nb_epochs)):
         model_output = model(pixel_coordinates)
 
         # Resize model output tensor to match the size of pixel values tensor
@@ -96,12 +96,16 @@ def train_model(model, model_optimizer, pixel_coordinates, pixel_values, nb_epoc
         loss.backward()
         model_optimizer.step()
 
+        print(f"Epoch [{epoch+1}/{nb_epochs}], Loss: {loss.item()}")  # Debugging statement
+
     return psnr, model_output
 
-def sequential_train(images, model, model_optimizer, save_name, nb_epochs=2):
+
+def sequential_train(images, model, model_optimizer, save_name, nb_epochs=300):
     """
     Train the model sequentially on the image sequence and save the trained model.
     """
+    print("Training model...")
     all_psnr = []
     for i in range(len(images) - 2):  # Train on all images except the last two
         img = images[i]
@@ -117,17 +121,83 @@ def sequential_train(images, model, model_optimizer, save_name, nb_epochs=2):
         pixel_coordinates = torch.cat((x.reshape(-1, 1), y.reshape(-1, 1)), dim=1).to(device)
 
         # Train the model
+        print(f"Training epoch {i+1}/{len(images)-2}")
         psnr, _ = train_model(model, model_optimizer, pixel_coordinates, pixel_values, nb_epochs)
         all_psnr.append(psnr)
 
     # Save the trained model
     torch.save(model.state_dict(), save_name)
+    print(f"Model saved at: {save_name}")
 
     return all_psnr
+
+
+
+def predict_next_two_timesteps(images, model, model_name, save_dir):
+    """
+    Predict the next two timesteps using the trained model.
+    """
+    print(f"Loading pre-trained {model_name} model...")
+    model_path = os.path.join(save_dir, f"{model_name.lower()}_model.pth")
+
+    if os.path.exists(model_path):
+        print(f"Loading pre-trained {model_name} model...")
+        model.load_state_dict(torch.load(model_path))
+        print(f"{model_name} model loaded successfully.")
+    else:
+        print(f"No pre-trained {model_name} model found. Training...")
+        train_images = images[:-2]  # Exclude the last two images for prediction
+        if model_name.lower() == "siren":
+            model_optimizer = torch.optim.Adam(lr=1e-4, params=model.parameters())
+            sequential_train(train_images, model, model_optimizer, model_path)
+        elif model_name.lower() == "mlp":
+            model_optimizer = torch.optim.Adam(lr=1e-4, params=model.parameters())
+            sequential_train(train_images, model, model_optimizer, model_path)
+        else:
+            print("Invalid model name.")
+            return
+
+    print(f"Number of predictions: {len(images) - 2}")
+    if len(images) - 2 > 0:
+        print("Predicting next two timesteps...")
+        predictions = []
+        for i in range(len(images) - 2):
+            img = images[i]
+
+            # Convert image to torch tensor
+            img_tensor = torch.from_numpy(img).float().unsqueeze(0).unsqueeze(0).to(device)
+            pixel_values = img_tensor.view(-1, 1)
+
+            # Input
+            resolution = max(img.shape)
+            tmp = torch.linspace(-1, 1, steps=resolution)
+            x, y = torch.meshgrid(tmp, tmp)
+            pixel_coordinates = torch.cat((x.reshape(-1, 1), y.reshape(-1, 1)), dim=1).to(device)
+
+            # Predict next two timesteps
+            _, prediction = train_model(model, model_optimizer, pixel_coordinates, pixel_values)
+            predictions.append(prediction.view(resolution, resolution).cpu().detach().numpy())
+
+        # Plot predictions
+        fig, axes = plt.subplots(2, len(predictions), figsize=(15, 5))
+        for i, pred in enumerate(predictions):
+            axes[0, i].imshow(images[i], cmap='gray')
+            axes[0, i].set_title('Input Image', fontsize=13)
+            axes[1, i].imshow(pred, cmap='gray')
+            axes[1, i].set_title('Predicted Image', fontsize=13)
+
+        plt.savefig(os.path.join(save_dir, f'{model_name.lower()}_predictions.png'))
+        plt.show()
+    else:
+        print("No predictions available.")
+
+
 
 if __name__ == "__main__":
     # Check if CUDA is available
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    # Print device
     print('Using device:', device)
 
     siren = Siren().to(device)
@@ -136,20 +206,52 @@ if __name__ == "__main__":
     # Ensure that the directory for saving figures exists
     os.makedirs(save_dir, exist_ok=True)
 
-    # Sequentially train SIREN model
-    siren_optimizer = torch.optim.Adam(lr=1e-4, params=siren.parameters())
-    siren_psnr = sequential_train(images, siren, siren_optimizer, os.path.join(save_dir, 'siren_model.pth'))
+    for i, img in enumerate(images):
+        # Print shape of the loaded image
+        print(f"Shape of image {i+1}:", img.shape)
 
-    # Sequentially train ReLU model
-    mlp_optimizer = torch.optim.Adam(lr=1e-4, params=mlp.parameters())
-    mlp_psnr = sequential_train(images, mlp, mlp_optimizer, os.path.join(save_dir, 'mlp_model.pth'))
+        # Convert image to torch tensor
+        img_tensor = torch.from_numpy(img).float().unsqueeze(0).unsqueeze(0).to(device)
+        pixel_values = img_tensor.view(-1, 1)
 
-    # Plot PSNR curves
-    plt.figure(figsize=(10, 6))
-    plt.plot(np.mean(siren_psnr, axis=0), label='SIREN', c='C0')
-    plt.plot(np.mean(mlp_psnr, axis=0), label='ReLU', c='mediumseagreen')
-    plt.xlabel('Iterations', fontsize=14)
-    plt.ylabel('PSNR', fontsize=14)
-    plt.legend(fontsize=13)
-    plt.savefig(os.path.join(save_dir, 'psnr_curves.png'))
-    plt.show()
+        # Print shape of the pixel_values tensor
+        print(f"Shape of pixel_values tensor {i+1}:", pixel_values.shape)
+
+        # Input
+        resolution = max(img.shape)  # Use the maximum dimension of the image as resolution
+        tmp = torch.linspace(-1, 1, steps=resolution)
+        x, y = torch.meshgrid(tmp, tmp)
+        pixel_coordinates = torch.cat((x.reshape(-1, 1), y.reshape(-1, 1)), dim=1).to(device)
+
+        fig, axes = plt.subplots(1, 5, figsize=(15, 3))
+        axes[0].imshow(img, cmap='gray')
+        axes[0].set_title('Ground Truth', fontsize=13)
+
+        for j, model in enumerate([mlp, siren]):
+            # Training
+            optim = torch.optim.Adam(lr=1e-4, params=model.parameters())
+            psnr, model_output = train_model(model, optim, pixel_coordinates, pixel_values, nb_epochs=10)
+
+            axes[j + 1].imshow(model_output.cpu().view(resolution, resolution).detach().numpy(), cmap='gray')
+            axes[j + 1].set_title('ReLU' if (j == 0) else 'SIREN', fontsize=13)
+            axes[4].plot(psnr, label='ReLU' if (j == 0) else 'SIREN', c='C0' if (j == 0) else 'mediumseagreen')
+            axes[4].set_xlabel('Iterations', fontsize=14)
+            axes[4].set_ylabel('PSNR', fontsize=14)
+            axes[4].legend(fontsize=13)
+
+        for j in range(4):
+            axes[j].set_xticks([])
+            axes[j].set_yticks([])
+        axes[3].axis('off')
+
+        # Save the figure
+        plt.savefig(os.path.join(save_dir, f'training_results_{i}.png'))
+        plt.close()
+
+    # Save the trained models
+    torch.save(mlp.state_dict(), 'mlp_model.pth')
+    torch.save(siren.state_dict(), 'siren_model.pth')
+
+    # Now, let's predict the next two timesteps after training the models
+    predict_next_two_timesteps(images, siren, 'SIREN', save_dir)
+    predict_next_two_timesteps(images, mlp, 'MLP', save_dir)
