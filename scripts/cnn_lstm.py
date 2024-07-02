@@ -78,7 +78,7 @@ class MLP(nn.Module):
     def forward(self, x):
         return self.net(x)
 
-def train_model(model, model_optimizer, pixel_coordinates, pixel_values, nb_epochs=300):
+def train_model(model, model_optimizer, pixel_coordinates, pixel_values, nb_epochs=2):
     """
     Train the model on the given data.
     """
@@ -101,7 +101,7 @@ def train_model(model, model_optimizer, pixel_coordinates, pixel_values, nb_epoc
     return psnr, model_output
 
 
-def sequential_train(images, model, model_optimizer, save_name, nb_epochs=300):
+def sequential_train(images, model, model_optimizer, save_name, nb_epochs=5):
     """
     Train the model sequentially on the image sequence and save the trained model.
     """
@@ -133,7 +133,7 @@ def sequential_train(images, model, model_optimizer, save_name, nb_epochs=300):
 
 
 
-def predict_next_two_timesteps(images, model, model_name, save_dir):
+def predict_next_two_timesteps(images, model, model_optimizer, model_name, save_dir):
     """
     Predict the next two timesteps using the trained model.
     """
@@ -230,7 +230,7 @@ if __name__ == "__main__":
         for j, model in enumerate([mlp, siren]):
             # Training
             optim = torch.optim.Adam(lr=1e-4, params=model.parameters())
-            psnr, model_output = train_model(model, optim, pixel_coordinates, pixel_values, nb_epochs=300)
+            psnr, model_output = train_model(model, optim, pixel_coordinates, pixel_values, nb_epochs=2)
 
             axes[j + 1].imshow(model_output.cpu().view(resolution, resolution).detach().numpy(), cmap='gray')
             axes[j + 1].set_title('ReLU' if (j == 0) else 'SIREN', fontsize=13)
@@ -253,5 +253,5 @@ if __name__ == "__main__":
     torch.save(siren.state_dict(), 'siren_model.pth')
 
     # Now, let's predict the next two timesteps after training the models
-    predict_next_two_timesteps(images, siren, 'SIREN', save_dir)
-    predict_next_two_timesteps(images, mlp, 'MLP', save_dir)
+    predict_next_two_timesteps(images, siren, model_optimizer, 'SIREN', save_dir)
+    predict_next_two_timesteps(images, mlp, model_optimizer, 'MLP', save_dir)
