@@ -202,6 +202,8 @@ if __name__ == "__main__":
 
     siren = Siren().to(device)
     mlp = MLP().to(device)
+    siren = nn.DataParallel(siren)
+    mlp = nn.DataParallel(mlp)
 
     # Ensure that the directory for saving figures exists
     os.makedirs(save_dir, exist_ok=True)
