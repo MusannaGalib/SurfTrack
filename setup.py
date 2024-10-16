@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='Image_tracking',
+    name='SurfTrack',
     version='1.0.0',
     packages=find_packages(),
     author='Musanna Galib, Matteo Ferraresso',
@@ -9,7 +9,7 @@ setup(
     description='Package for tracking and analyzing in-situ optical microscopy images',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
-    url='https://github.com/MusannaGalib/Image_tracking.git',
+    url='https://github.com/MusannaGalib/SurfTrack.git',
     license='MIT',
     install_requires=[
         # Add any Python dependencies required by your package

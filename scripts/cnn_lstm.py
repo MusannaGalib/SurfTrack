@@ -61,8 +61,14 @@ class Siren(nn.Module):
             self.net[8].weight.uniform_(-np.sqrt(6. / hidden_dim) / w0,
                                         np.sqrt(6. / hidden_dim) / w0)
 
+        # Added DataParallel for multi-GPU support
+        if torch.cuda.device_count() > 1:
+            print(f"Using {torch.cuda.device_count()} GPUs for Siren.")
+            self.net = nn.DataParallel(self.net)
+
     def forward(self, x):
         return self.net(x)
+
 
 
 class MLP(nn.Module):
@@ -75,8 +81,14 @@ class MLP(nn.Module):
                                  nn.Linear(hidden_dim, hidden_dim), nn.ReLU(),
                                  nn.Linear(hidden_dim, out_dim))
 
+        # Added DataParallel for multi-GPU support
+        if torch.cuda.device_count() > 1:
+            print(f"Using {torch.cuda.device_count()} GPUs for MLP.")
+            self.net = nn.DataParallel(self.net)
+
     def forward(self, x):
         return self.net(x)
+
 
 def train_model(model, model_optimizer, pixel_coordinates, pixel_values, nb_epochs=2):
     """
@@ -138,6 +150,7 @@ def predict_next_two_timesteps(images, model, model_optimizer, model_name, save_
     Predict the next two timesteps using the trained model.
     """
     print(f"Loading pre-trained {model_name} model...")
+    save_dir = 'Imgs'
     model_path = os.path.join(save_dir, f"{model_name.lower()}_model.pth")
 
     if os.path.exists(model_path):
@@ -255,5 +268,6 @@ if __name__ == "__main__":
     torch.save(siren.state_dict(), 'siren_model.pth')
 
     # Now, let's predict the next two timesteps after training the models
-    predict_next_two_timesteps(images, siren, model_optimizer, 'SIREN', save_dir)
-    predict_next_two_timesteps(images, mlp, model_optimizer, 'MLP', save_dir)
+    predict_next_two_timesteps(images, siren, save_dir, 'SIREN')
+    predict_next_two_timesteps(images, mlp, save_dir, 'MLP')
+

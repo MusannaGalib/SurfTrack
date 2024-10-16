@@ -15,7 +15,7 @@ The project aims to develop a package for tracking and analyzing any images from
 
 ### Installation
 1. **Download the Package:**
-   - Download the zip file containing the Image_tracking package.
+   - Download the zip file containing the SurfTrack package.
    - Extract the zip file to a directory of your choice.
 
 2. **Install the Package:**
@@ -23,15 +23,15 @@ The project aims to develop a package for tracking and analyzing any images from
    - Navigate to the directory where you extracted the package.
    - Install the package by running the command:
 ```bash
-git clone https://github.com/MusannaGalib/Image_tracking.git
-cd Image_tracking
+git clone https://github.com/MusannaGalib/SurfTrack.git
+cd SurfTrack
 pip install .
 ```
    This command installs the package along with its dependencies.
 
-   Image_tracking can also be installed from PyPI:
+   SurfTrack can also be installed from PyPI:
 ```bash
-pip install Image_tracking
+pip install SurfTrack
 ```
 
 ### Using the Package
