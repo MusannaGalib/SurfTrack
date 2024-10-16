@@ -36,7 +36,7 @@ pip install SurfTrack
 
 ### Using the Package
 
-To use this package, give your matlab executable path in run.py. Then just copy your movie.mp4 file in the scirpts folder and run the following command 
+To use this package, give your matlab executable path in ```run.py```. Then just copy your movie.mp4 file in the scirpts folder and run the following command 
 
 ```python
 process = subprocess.Popen(['C:/Program Files/MATLAB/R2022a/bin/matlab', '-nosplash', '-nodesktop', '-r', f"run('{script_path}');exit;"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -49,7 +49,7 @@ python3 run.py
 
 ```
 
-If you want to change the number of images that needed to be generated from the movie change the following file in the run.py file:
+If you want to change the number of images that needed to be generated from the movie change the following file in the ```run.py``` file:
 ```python
 
 # Define how many images you want from the video
