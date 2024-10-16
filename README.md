@@ -1,4 +1,4 @@
-# Image Tracking 
+# SurfTrack
 
 This repository contains scripts for tracking and analyzing versatile images from in-situ optical microscopy (OM) experiment or Blood Clotting experiments.
 

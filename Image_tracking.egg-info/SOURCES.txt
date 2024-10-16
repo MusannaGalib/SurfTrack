@@ -1,8 +1,0 @@
-LICENSE
-README.md
-setup.py
-Image_tracking.egg-info/PKG-INFO
-Image_tracking.egg-info/SOURCES.txt
-Image_tracking.egg-info/dependency_links.txt
-Image_tracking.egg-info/top_level.txt
-scripts/run.py

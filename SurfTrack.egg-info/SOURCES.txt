@@ -1,0 +1,7 @@
+LICENSE
+README.md
+setup.py
+SurfTrack.egg-info/PKG-INFO
+SurfTrack.egg-info/SOURCES.txt
+SurfTrack.egg-info/dependency_links.txt
+SurfTrack.egg-info/top_level.txt
