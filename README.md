@@ -80,7 +80,6 @@ BibTeX entry:
   year={2025},
   publisher={American Chemical Society}
 }
-}
 ```
 
 ### Contact, questions, and contributing
