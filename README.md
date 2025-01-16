@@ -74,11 +74,12 @@ If you use this software in your research, please cite the following paper:
 ```python
 BibTeX entry:
 @article{YourPaper,
-  title={Title of Your Paper},
-  author={Your Name},
-  journal={Journal/Conference},
-  year={2024},
-  publisher={Publisher}
+  title={Dendrite Inhibition using Heteroepitaxial Residual Stress in Zn Metal Batteries},
+  author={Musanna Galib, Amardeep Amardeep, Jian Liu, and Mauricio Ponga},
+  journal={ACS Energy Lett},
+  year={2025},
+  publisher={American Chemical Society}
+}
 }
 ```
 
