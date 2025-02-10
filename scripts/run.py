@@ -11,7 +11,7 @@ def run_matlab_script(script_name, npics):
                 f.write(str(npics))
 
             # Replace 'matlab' with the path to your MATLAB executable if it's not in the system PATH
-            process = subprocess.Popen(['C:/Program Files/MATLAB/R2023b/bin/matlab', '-nosplash', '-nodesktop', '-r', f"run('{script_path}');exit;"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            process = subprocess.Popen(['C:/Program Files/MATLAB/R2024b/bin/matlab', '-nosplash', '-nodesktop', '-r', f"run('{script_path}');exit;"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = process.communicate()
             if stderr:
                 print(stderr.decode("utf-8"))
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     matlab_script_name_2 = 'Tracked_surface_compare.m'
 
     # Define how many images you want from the video
-    npics = 10
+    npics = 3
 
     run_matlab_script(matlab_script_name_1, npics)  # Run the first MATLAB script
 
