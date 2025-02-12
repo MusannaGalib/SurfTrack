@@ -1,12 +1,11 @@
-Metadata-Version: 2.1
+Metadata-Version: 2.2
 Name: SurfTrack
-Version: 1.0.0
+Version: 0.0.1
 Summary: Package for tracking and analyzing in-situ optical microscopy images
 Home-page: https://github.com/MusannaGalib/SurfTrack.git
 Author: Musanna Galib, Matteo Ferraresso
 Author-email: galibubc@student.ubc.ca, matfe@mail.ubc.ca
 License: MIT
-Platform: UNKNOWN
 Classifier: Development Status :: 4 - Beta
 Classifier: Intended Audience :: Science/Research
 Classifier: License :: OSI Approved :: MIT License
@@ -16,6 +15,22 @@ Classifier: Programming Language :: Python :: 3.8
 Classifier: Programming Language :: Python :: 3.9
 Description-Content-Type: text/markdown
 License-File: LICENSE
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: license
+Dynamic: summary
+
+<!-- [![PyPI downloads](https://img.shields.io/pypi/dm/MOOSEanalyze)](https://pypi.org/project/MOOSEanalyze/) -->
+<!--[![Paper](https://img.shields.io/badge/ACS_Energy_Lett-blue)](https://doi.org/your-paper-doi) -->
+[![arXiv](https://img.shields.io/badge/arXiv-2502.03841-blue)](https://arxiv.org/abs/2502.03841)
+[![Python 3.6+](https://img.shields.io/badge/python-3.6+-red.svg)](https://www.python.org/downloads/)
+[![Release](https://img.shields.io/badge/release-v0.0.1-brightgreen)](https://github.com/MusannaGalib/SurfTrack)
+[![License: MIT](https://img.shields.io/badge/license-MIT_2.0-yellow)](https://opensource.org/licenses/MIT)
+
 
 # SurfTrack
 
@@ -28,6 +43,7 @@ The project aims to develop a package for tracking and analyzing any images from
 ## Requirements
 
 - MATLAB R2022a or later
+- MATLAB Computer Vision Toolbox
 - Python 3.x
 
 ## Setup
@@ -55,7 +71,7 @@ pip install SurfTrack
 
 ### Using the Package
 
-To use this package, give your matlab executable path in run.py. Then just copy your movie.mp4 file in the scirpts folder and run the following command 
+To use this package, give your matlab executable path in ```run.py```. Then just copy your movie.mp4 file in the scirpts folder and run the following command 
 
 ```python
 process = subprocess.Popen(['C:/Program Files/MATLAB/R2022a/bin/matlab', '-nosplash', '-nodesktop', '-r', f"run('{script_path}');exit;"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -64,11 +80,11 @@ process = subprocess.Popen(['C:/Program Files/MATLAB/R2022a/bin/matlab', '-nospl
 
 ```python
 
-python3 run.py
+python3 wrapper.py
 
 ```
 
-If you want to change the number of images that needed to be generated from the movie change the following file in the run.py file:
+If you want to change the number of images that needed to be generated from the movie change the following file in the ```run.py``` file:
 ```python
 
 # Define how many images you want from the video
@@ -81,7 +97,7 @@ An example movie is given in 'scripts' folder. You can use the following command
 
 ```python
 # execute the python wrapper
-python3 run.py
+python3 wrapper.py
 ```
 ## Authors
 This Software is developed by Matteo Ferraresso & Musanna Galib
@@ -92,12 +108,14 @@ If you use this software in your research, please cite the following paper:
 
 ```python
 BibTeX entry:
-@article{YourPaper,
-  title={Title of Your Paper},
-  author={Your Name},
-  journal={Journal/Conference},
-  year={2024},
-  publisher={Publisher}
+@misc{galib2025dendritesuppressionznbatteries,
+      title={Dendrite Suppression in Zn Batteries Through Hetero-Epitaxial Residual Stresses Shield}, 
+      author={Musanna Galib and Amardeep Amardeep and Jian Liu and Mauricio Ponga},
+      year={2025},
+      eprint={2502.03841},
+      archivePrefix={arXiv},
+      primaryClass={cond-mat.mtrl-sci},
+      url={https://arxiv.org/abs/2502.03841}, 
 }
 ```
 
@@ -107,5 +125,3 @@ If you have questions, please don't hesitate to reach out to galibubc[at]student
 If you find a bug or have a proposal for a feature, please post it in the Issues. If you have a question, topic, or issue that isn't obviously one of those, try our GitHub Disucssions.
 
 If your post is related to the framework/package, please post in the issues/discussion on that repository. 
-
-
