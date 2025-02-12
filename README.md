@@ -16,7 +16,7 @@ The project aims to develop a package for tracking and analyzing any images from
 ## Requirements
 
 - MATLAB R2022a or later
-- MATLAB Computer Vision Toolbox.
+- MATLAB Computer Vision Toolbox
 - Python 3.x
 
 ## Setup
