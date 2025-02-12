@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='SurfTrack',
-    version='1.0.0',
+    version='0.0.1',
     packages=find_packages(),
     author='Musanna Galib, Matteo Ferraresso',
     author_email='galibubc@student.ubc.ca, matfe@mail.ubc.ca',
