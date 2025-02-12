@@ -1,5 +1,6 @@
 <!-- [![PyPI downloads](https://img.shields.io/pypi/dm/MOOSEanalyze)](https://pypi.org/project/MOOSEanalyze/) -->
 <!--[![Paper](https://img.shields.io/badge/ACS_Energy_Lett-blue)](https://doi.org/your-paper-doi) -->
+[![arXiv](https://img.shields.io/badge/arXiv-2502.03841-blue)](https://arxiv.org/abs/2502.03841)
 [![Python 3.6+](https://img.shields.io/badge/python-3.6+-red.svg)](https://www.python.org/downloads/)
 [![Release](https://img.shields.io/badge/release-v0.0.1-brightgreen)](https://github.com/MusannaGalib/SurfTrack)
 [![License: MIT](https://img.shields.io/badge/license-MIT_2.0-yellow)](https://opensource.org/licenses/MIT)
