@@ -6,13 +6,10 @@ Home-page: https://github.com/MusannaGalib/SurfTrack.git
 Author: Musanna Galib, Matteo Ferraresso
 Author-email: galibubc@student.ubc.ca, matfe@mail.ubc.ca
 License: MIT
-Classifier: Development Status :: 4 - Beta
+Classifier: Development Status :: 5 - Production/Stable
 Classifier: Intended Audience :: Science/Research
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Programming Language :: Python :: 3
-Classifier: Programming Language :: Python :: 3.7
-Classifier: Programming Language :: Python :: 3.8
-Classifier: Programming Language :: Python :: 3.9
 Description-Content-Type: text/markdown
 License-File: LICENSE
 Dynamic: author
