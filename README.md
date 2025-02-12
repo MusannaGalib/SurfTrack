@@ -53,7 +53,7 @@ process = subprocess.Popen(['C:/Program Files/MATLAB/R2022a/bin/matlab', '-nospl
 
 ```python
 
-python3 run.py
+python3 wrapper.py
 
 ```
 
@@ -70,7 +70,7 @@ An example movie is given in 'scripts' folder. You can use the following command
 
 ```python
 # execute the python wrapper
-python3 run.py
+python3 wrapper.py
 ```
 ## Authors
 This Software is developed by Matteo Ferraresso & Musanna Galib
